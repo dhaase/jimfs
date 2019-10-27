@@ -48,7 +48,7 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**
  * {@link FileSystemProvider} implementation for Jimfs. This provider implements the actual file
@@ -89,13 +89,6 @@ final class JimfsFileSystemProvider extends FileSystemProvider {
   }
 
   @Override
-  public FileSystem getFileSystem(URI uri) {
-    throw new UnsupportedOperationException(
-        "This method should not be called directly; "
-            + "use FileSystems.getFileSystem(URI) instead.");
-  }
-
-  @Override
   public FileSystem newFileSystem(Path path, Map<String, ?> env) throws IOException {
     JimfsPath checkedPath = checkPath(path);
     checkNotNull(env);
@@ -114,6 +107,18 @@ final class JimfsFileSystemProvider extends FileSystemProvider {
   }
 
   @Override
+  public FileSystem getFileSystem(URI uri) {
+    throw new UnsupportedOperationException(
+        "This method should not be called directly; "
+            + "use FileSystems.getFileSystem(URI) instead.");
+  }
+
+  /** Gets the file system for the given path. */
+  private static JimfsFileSystem getFileSystem(Path path) {
+    return (JimfsFileSystem) checkPath(path).getFileSystem();
+  }
+
+  @Override
   public Path getPath(URI uri) {
     throw new UnsupportedOperationException(
         "This method should not be called directly; " + "use Paths.get(URI) instead.");
@@ -125,11 +130,6 @@ final class JimfsFileSystemProvider extends FileSystemProvider {
     }
     throw new ProviderMismatchException(
         "path " + path + " is not associated with a Jimfs file system");
-  }
-
-  /** Gets the file system for the given path. */
-  private static JimfsFileSystem getFileSystem(Path path) {
-    return (JimfsFileSystem) checkPath(path).getFileSystem();
   }
 
   /** Returns the default file system view for the given path. */
@@ -170,7 +170,7 @@ final class JimfsFileSystemProvider extends FileSystemProvider {
   public AsynchronousFileChannel newAsynchronousFileChannel(
       Path path,
       Set<? extends OpenOption> options,
-      @Nullable ExecutorService executor,
+      @NullableDecl ExecutorService executor,
       FileAttribute<?>... attrs)
       throws IOException {
     // call newFileChannel and cast so that FileChannel support is checked there
@@ -258,11 +258,6 @@ final class JimfsFileSystemProvider extends FileSystemProvider {
     copy(source, target, Options.getCopyOptions(options), false);
   }
 
-  @Override
-  public void move(Path source, Path target, CopyOption... options) throws IOException {
-    copy(source, target, Options.getMoveOptions(options), true);
-  }
-
   private void copy(Path source, Path target, ImmutableSet<CopyOption> options, boolean move)
       throws IOException {
     JimfsPath sourcePath = checkPath(source);
@@ -271,6 +266,11 @@ final class JimfsFileSystemProvider extends FileSystemProvider {
     FileSystemView sourceView = getDefaultView(sourcePath);
     FileSystemView targetView = getDefaultView(targetPath);
     sourceView.copy(sourcePath, targetView, targetPath, options, move);
+  }
+
+  @Override
+  public void move(Path source, Path target, CopyOption... options) throws IOException {
+    copy(source, target, Options.getMoveOptions(options), true);
   }
 
   @Override
@@ -320,7 +320,7 @@ final class JimfsFileSystemProvider extends FileSystemProvider {
     getDefaultView(checkedPath).checkAccess(checkedPath);
   }
 
-  @Nullable
+  @NullableDecl
   @Override
   public <V extends FileAttributeView> V getFileAttributeView(
       Path path, Class<V> type, LinkOption... options) {

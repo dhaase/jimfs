@@ -20,7 +20,7 @@ import java.nio.file.InvalidPathException;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**
  * Windows-style path type.
@@ -64,7 +64,7 @@ final class WindowsPathType extends PathType {
       throw new InvalidPathException(
           original,
           "Jimfs does not currently support the Windows syntax for a relative path "
-              + "on a specific drive (e.g. \"C:foo\\bar\"");
+              + "on a specific drive (e.g. \"C:foo\\bar\")");
     }
 
     String root;
@@ -74,7 +74,7 @@ final class WindowsPathType extends PathType {
       throw new InvalidPathException(
           original,
           "Jimfs does not currently support the Windows syntax for an absolute path "
-              + "on the current drive (e.g. \"\\foo\\bar\"");
+              + "on the current drive (e.g. \"\\foo\\bar\")");
     } else {
       root = parseDriveRoot(path);
     }
@@ -134,7 +134,7 @@ final class WindowsPathType extends PathType {
   private static final Pattern DRIVE_LETTER_ROOT = Pattern.compile("^[a-zA-Z]:\\\\");
 
   /** Parses a normal drive-letter root, e.g. "C:\". */
-  @Nullable
+  @NullableDecl
   private String parseDriveRoot(String path) {
     Matcher drivePathMatcher = DRIVE_LETTER_ROOT.matcher(path);
     if (drivePathMatcher.find()) {
@@ -160,7 +160,7 @@ final class WindowsPathType extends PathType {
   }
 
   @Override
-  public String toString(@Nullable String root, Iterable<String> names) {
+  public String toString(@NullableDecl String root, Iterable<String> names) {
     StringBuilder builder = new StringBuilder();
     if (root != null) {
       builder.append(root);

@@ -36,14 +36,14 @@ import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**
  * Subject for doing assertions on file system paths.
  *
  * @author Colin Decker
  */
-public final class PathSubject extends Subject<PathSubject, Path> {
+public final class PathSubject extends Subject {
 
   /** Returns the subject factory for doing assertions on paths. */
   public static Subject.Factory<PathSubject, Path> paths() {
@@ -103,7 +103,7 @@ public final class PathSubject extends Subject<PathSubject, Path> {
   }
 
   /** Asserts that the path has the given root component. */
-  public PathSubject hasRootComponent(@Nullable String root) {
+  public PathSubject hasRootComponent(@NullableDecl String root) {
     Path rootComponent = actual.getRoot();
     if (root == null && rootComponent != null) {
       failWithActual("expected to have root component", root);

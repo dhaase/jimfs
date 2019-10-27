@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -215,9 +215,17 @@ public class DirectoryTest {
     root.link(Name.simple("bar"), regularFile(10));
     root.link(Name.simple("abc"), regularFile(10));
 
+    /*
+     * If we inline this into the assertThat call below, javac resolves it to assertThat(SortedSet),
+     * which isn't available publicly. Our @GoogleInternal checks consider that to be an error, even
+     * though the code will compile fine externally by resolving to assertThat(Iterable) instead. So
+     * we avoid that by assigning to a non-SortedSet type here.
+     */
+    ImmutableSet<Name> snapshot = root.snapshot();
     // does not include . or .. and is sorted by the name
-    assertThat(root.snapshot())
-        .containsExactly(Name.simple("abc"), Name.simple("bar"), Name.simple("foo"));
+    assertThat(snapshot)
+        .containsExactly(Name.simple("abc"), Name.simple("bar"), Name.simple("foo"))
+        .inOrder();
   }
 
   @Test
@@ -357,7 +365,7 @@ public class DirectoryTest {
     return new DirectoryEntry(A, Name.simple(name), A);
   }
 
-  private static DirectoryEntry entry(Directory dir, String name, @Nullable File file) {
+  private static DirectoryEntry entry(Directory dir, String name, @NullableDecl File file) {
     return new DirectoryEntry(dir, Name.simple(name), file);
   }
 

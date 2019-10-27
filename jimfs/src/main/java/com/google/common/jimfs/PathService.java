@@ -38,7 +38,7 @@ import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 /**
  * Service for creating {@link JimfsPath} instances and handling other path-related operations.
@@ -162,7 +162,7 @@ final class PathService implements Comparator<JimfsPath> {
   }
 
   /** Returns a path with the given root (or no root, if null) and the given names. */
-  public JimfsPath createPath(@Nullable Name root, Iterable<Name> names) {
+  public JimfsPath createPath(@NullableDecl Name root, Iterable<Name> names) {
     ImmutableList<Name> nameList = ImmutableList.copyOf(Iterables.filter(names, NOT_EMPTY));
     if (root == null && nameList.isEmpty()) {
       // ensure the canonical empty path (one empty string name) is used rather than a path with
@@ -173,7 +173,7 @@ final class PathService implements Comparator<JimfsPath> {
   }
 
   /** Returns a path with the given root (or no root, if null) and the given names. */
-  protected final JimfsPath createPathInternal(@Nullable Name root, Iterable<Name> names) {
+  protected final JimfsPath createPathInternal(@NullableDecl Name root, Iterable<Name> names) {
     return new JimfsPath(this, root, names);
   }
 
@@ -199,6 +199,9 @@ final class PathService implements Comparator<JimfsPath> {
 
   /** Creates a hash code for the given path. */
   public int hash(JimfsPath path) {
+    // Note: JimfsPath.equals() is implemented using the compare() method below;
+    // equalityUsesCanonicalForm is taken into account there via the namesOrdering, which is set
+    // at construction time.
     int hash = 31;
     hash = 31 * hash + getFileSystem().hashCode();
 
@@ -251,7 +254,9 @@ final class PathService implements Comparator<JimfsPath> {
    */
   public PathMatcher createPathMatcher(String syntaxAndPattern) {
     return PathMatchers.getPathMatcher(
-        syntaxAndPattern, type.getSeparator() + type.getOtherSeparators(), displayNormalizations);
+        syntaxAndPattern,
+        type.getSeparator() + type.getOtherSeparators(),
+        equalityUsesCanonicalForm ? canonicalNormalizations : displayNormalizations);
   }
 
   private static final Predicate<Object> NOT_EMPTY =
